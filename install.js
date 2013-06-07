@@ -28,6 +28,9 @@ function envpassthru() {
 }
 
 var buildDir = path.join(__dirname, "deps/libgit2/build");
+var debug = (process.argv.indexOf("--debug") >= 0);
+var debugflag = debug ? "--debug" : "";
+
 async.series([
 	function(cb) {
 		console.log("[gitteh] Downloading libgit2 dependency.");
@@ -41,7 +44,8 @@ async.series([
 		envpassthru("mkdir", "-p", buildDir, cb);
 	},
 	function(cb) {
-		envpassthru("cmake", "-DTHREADSAFE=1", "-DBUILD_CLAR=0", "..", {
+		var debugflag = debug ? "_DCMAKE_BUILD_TYPE=DEBUG" : "-DCMAKE_BUILD_TYPE=Release";
+		envpassthru("cmake", debugflag, "-DTHREADSAFE=1", "-DBUILD_CLAR=0", "..", {
 			cwd: buildDir
 		}, cb);
 	},
@@ -52,10 +56,10 @@ async.series([
 	},
 	function(cb) {
 		console.log("[gitteh] Building native module.");
-		shpassthru("./node_modules/.bin/node-gyp configure --debug", cb);
+		shpassthru("./node_modules/.bin/node-gyp configure " + debugflag, cb);
 	},
 	function(cb) {
-		shpassthru("./node_modules/.bin/node-gyp build", cb);
+		shpassthru("./node_modules/.bin/node-gyp build " + debugflag, cb);
 	}
 ], function(err) {
 	if(err) process.exit(err);
