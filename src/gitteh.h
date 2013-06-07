@@ -20,10 +20,15 @@ using namespace node;
 using namespace cvv8;
 using std::string;
 
-#define REQ_EXT_ARG(I, VAR)                                             	\
-	if (args.Length() <= (I) || !args[I]->IsExternal())                   	\
+#define REQ_EXT_ARG(I, VAR)                                             \
+	if (args.Length() <= (I) || !args[I]->IsExternal()) {                 \
+		std::ostringstream oss;                                             \
+		oss << __FILE__                                                     \
+				<< ":" << __LINE__                                              \
+				<< " " << " Argument " << I << " invalid";                      \
 		return ThrowException(Exception::TypeError(                         \
-			String::New("Argument " #I " invalid")));						\
+			String::New( oss.str().c_str() )));                               \
+	}                                                                     \
 	Local<External> VAR = Local<External>::Cast(args[I]);
 
 namespace gitteh {
